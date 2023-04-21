@@ -104,12 +104,13 @@ class ParseJs():  # 获取js进行提取
         else:
             baseUrl = res.scheme + "://" + res.netloc + res.path
             if res.path[-1:] != "/":  # 文件夹没"/",若输入的是文件也会被加上，但是影响不大
-                baseUrl = baseUrl + "/"
-        if self.url[-1:] != "/":  # 有文件的url
-            tmpPath = res.path.split('/')
-            tmpPath = tmpPath[:]  # 防止解析报错
-            del tmpPath[-1]
-            baseUrl = res.scheme + "://" + res.netloc + "/".join(tmpPath) + "/"
+                try:
+                    if res.path[-3:] == "htm" or res.path[-4:] == "html":
+                        baseUrl = baseUrl.rsplit("/",1)[0] + "/"
+                    else:
+                        baseUrl = baseUrl + "/"
+                except:
+                    baseUrl = baseUrl + "/"
         for jsPath in js_paths:  # 路径处理多种情况./ ../ / http
             if jsPath[:2] == "./":
                 jsPath = jsPath.replace("./", "")
@@ -124,9 +125,12 @@ class ParseJs():  # 获取js进行提取
                 dirCount = jsPath.count('../') + 1
                 tmpCount = 1
                 jsPath = jsPath.replace("../", "")
-                while tmpCount <= dirCount:
-                    del new_tmpPath[-1]
-                    tmpCount = tmpCount + 1
+                try:
+                    while tmpCount <= dirCount:
+                        del new_tmpPath[-1]
+                        tmpCount = tmpCount + 1
+                except:
+                    pass #防止有人在主路径内引用文件用多个../
                 baseUrl = res.scheme + "://" + res.netloc + "/".join(new_tmpPath) + "/"
                 jsRealPath = baseUrl + jsPath
                 self.jsRealPaths.append(jsRealPath)
@@ -141,7 +145,7 @@ class ParseJs():  # 获取js进行提取
                 self.jsRealPaths.append(jsRealPath)
             else:
                 #jsRealPath = res.scheme + "://" + res.netloc + "/" + jsPath
-                jsRealPath = baseUrl + jsPath #我感觉我原来的逻辑写错了
+                jsRealPath = baseUrl + jsPath
                 self.jsRealPaths.append(jsRealPath)
         self.log.info(Utils().tellTime() + Utils().getMyWord("{pares_js_fini_1}") + str(len(self.jsRealPaths)) + Utils().getMyWord("{pares_js_fini_2}"))
         domain = res.netloc
@@ -163,8 +167,12 @@ class ParseJs():  # 获取js进行提取
         for item in soup.find_all("script"):
             scriptString = str(item.string)  # 防止特殊情况报错
             listSrc = re.findall(r'src=\"(.*?)\.js', scriptString)
-            if not listSrc == []:
-                for jsPath in listSrc:
+            listSrc = list(filter(None, listSrc))
+            listSrc_new = []
+            for list_s in listSrc:
+                listSrc_new.append(list_s + ".js")
+            if not listSrc_new == []:
+                for jsPath in listSrc_new:
                     self.jsPathList.append(jsPath)
             if scriptString != "None": #None被转成字符串了
                 scriptInside = scriptInside + scriptString

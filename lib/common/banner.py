@@ -6,7 +6,7 @@ from lib.common.utils import Utils
 from lib.common.cmdline import CommandLines
 
 
-Version = 'Packer Fuzzer v1.4'
+Version = 'Packer Fuzzer v1.4.15'
 red = '\033[25;31m'
 green = '\033[25;32m'
 yellow = '\033[25;33m'
@@ -76,10 +76,10 @@ Banner7 = """{}
 """.format(green,Version,end)
 
 def RandomBanner():
-    # BannerList = [Banner1,Banner2,Banner3,Banner4]
+    # BannerList = [Banner1,Banner2,Banner3,Banner7]
     if CommandLines().cmd().silent == None:
         print(Banner7)
-        print("©2022 Poc-Sir、KpLi0rn、Liucy、RachesseHS、Lupin-III")
+        print("©2023 Poc-Sir、KpLi0rn、Liucy、RachesseHS、Lupin-III")
         print("Project Hub: https://github.com/rtcatc/Packer-Fuzzer")
         print(Utils().getMyWord("{xhlj}") + "\n")
 
